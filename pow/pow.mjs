@@ -1,10 +1,8 @@
-"use strict";
-
-var crypto = require("crypto");
+import { createHash } from 'crypto';
 
 // The Power of a Smile
 // by Tupac Shakur
-var poem = [
+const poem = [
 	"The power of a gun can kill",
 	"and the power of fire can burn",
 	"the power of wind can chill",
@@ -15,9 +13,9 @@ var poem = [
 	"especially yours can heal a frozen heart",
 ];
 
-var difficulty = 10;
+let difficulty = 10; // number of leading bits required to be 0
 
-var Blockchain = {
+const Blockchain = {
 	blocks: [],
 };
 
@@ -41,7 +39,7 @@ for (let line of poem) {
 // **********************************
 
 function createBlock(data) {
-	var bl = {
+	const bl = {
 		index: Blockchain.blocks.length,
 		prevHash: Blockchain.blocks[Blockchain.blocks.length-1].hash,
 		data,
@@ -53,12 +51,40 @@ function createBlock(data) {
 	return bl;
 }
 
+function generateHash({
+  prevHash,
+  data,
+  timestamp,
+  nonce
+}) {
+  return createHash('sha256').update(`${prevHash}${data}${timestamp}${nonce}`).digest('hex');
+}
+
 function blockHash(bl) {
-	// TODO
+  let isValid = false;
+  let nonce;
+  let hash;
+
+  while (!isValid) {
+    nonce = Math.floor(Math.random() * Number.MAX_VALUE);
+    hash = generateHash({
+      prevHash: bl.prevHash,
+      data: JSON.stringify(bl.data),
+      timestamp: bl.timestamp,
+      nonce,
+    });
+
+    if (hashIsLowEnough(hash)) {
+      isValid = true;
+    }
+  }
+
+  return hash;
 }
 
 function hashIsLowEnough(hash) {
-	// TODO
+  const leadingChars = Math.floor(difficulty / 4); // 4 bits per hex char
+	return hash.slice(0, leadingChars) === ''.padStart(leadingChars, '0');
 }
 
 function verifyBlock(bl) {
@@ -82,7 +108,7 @@ function verifyBlock(bl) {
 }
 
 function verifyChain(chain) {
-	var prevHash;
+	let prevHash;
 	for (let bl of chain.blocks) {
 		if (prevHash && bl.prevHash !== prevHash) return false;
 		if (!verifyBlock(bl)) return false;
