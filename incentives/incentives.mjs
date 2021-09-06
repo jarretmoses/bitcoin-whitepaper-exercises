@@ -1,8 +1,13 @@
-"use strict";
+'use strict';
 
-import path from 'path';
+import path, { dirname } from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const KEYS_DIR = path.join(__dirname,"keys");
 const PUB_KEY_TEXT = fs.readFileSync(path.join(KEYS_DIR,"pub.pgp.key"),"utf8");
@@ -36,7 +41,7 @@ Blockchain.blocks.push({
 	timestamp: Date.now(),
 });
 
-var transactionPool = [];
+const transactionPool = [];
 
 addPoem();
 processPool();
@@ -46,15 +51,45 @@ countMyEarnings();
 // **********************************
 
 function addPoem() {
-	// TODO: add lines of poem as transactions to the transaction-pool
+  poem.forEach(data => {
+    transactionPool.push({
+      data,
+      fee: Math.ceil(Math.random() * 10)
+    })
+  })
 }
 
 function processPool() {
+  const sortedPool = transactionPool.sort((a, b) => b.fee - a.fee);
+  while (sortedPool.length) {
+    const blockTransactionFee = {
+      blockFee,
+      account: PUB_KEY_TEXT,
+    }
+
+    const transactions = sortedPool.splice(0, maxBlockSize - 1);
+
+    const block = createBlock(transactions);
+    block.transactions = [blockTransactionFee, ...transactions];
+
+    Blockchain.blocks.push(block);
+  }
+
+
 	// TODO: process the transaction-pool in order of highest fees
 }
 
 function countMyEarnings() {
-	// TODO: count up block-fees and transaction-fees
+	const total = Blockchain.blocks.reduce((currTotal, {index, transactions}) => {
+    // Genesis block
+    if (index === 0) {
+      return currTotal;
+    }
+
+    return currTotal + transactions.reduce((subTotal, {blockFee, fee}) => (
+      subTotal + (blockFee || fee) // shortcircuit first block
+    ), 0);
+  }, 0);
 }
 
 function createBlock(data) {
