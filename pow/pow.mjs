@@ -83,7 +83,7 @@ function blockHash(bl) {
 }
 
 function hashIsLowEnough(hash) {
-  const leadingChars = Math.floor(difficulty / 4); // 4 bits per hex char
+  const leadingChars = Math.ceil(difficulty / 4); // 4 bits per hex char
 	return hash.slice(0, leadingChars) === ''.padStart(leadingChars, '0');
 }
 

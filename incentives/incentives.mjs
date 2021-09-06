@@ -1,15 +1,15 @@
 "use strict";
 
-var path = require("path");
-var fs = require("fs");
-var crypto = require("crypto");
+import path from 'path';
+import fs from 'fs';
+import crypto from 'crypto';
 
 const KEYS_DIR = path.join(__dirname,"keys");
 const PUB_KEY_TEXT = fs.readFileSync(path.join(KEYS_DIR,"pub.pgp.key"),"utf8");
 
 // The Power of a Smile
 // by Tupac Shakur
-var poem = [
+const poem = [
 	"The power of a gun can kill",
 	"and the power of fire can burn",
 	"the power of wind can chill",
@@ -22,9 +22,9 @@ var poem = [
 
 const maxBlockSize = 4;
 const blockFee = 5;
-var difficulty = 16;
+let difficulty = 16;
 
-var Blockchain = {
+const Blockchain = {
 	blocks: [],
 };
 
@@ -58,7 +58,7 @@ function countMyEarnings() {
 }
 
 function createBlock(data) {
-	var bl = {
+	const bl = {
 		index: Blockchain.blocks.length,
 		prevHash: Blockchain.blocks[Blockchain.blocks.length-1].hash,
 		data,
@@ -84,14 +84,14 @@ function blockHash(bl) {
 }
 
 function hashIsLowEnough(hash) {
-	var neededChars = Math.ceil(difficulty / 4);
-	var threshold = Number(`0b${"".padStart(neededChars * 4,"1111".padStart(4 + difficulty,"0"))}`);
-	var prefix = Number(`0x${hash.substr(0,neededChars)}`);
+	const neededChars = Math.ceil(difficulty / 4);
+	const threshold = Number(`0b${"".padStart(neededChars * 4,"1111".padStart(4 + difficulty,"0"))}`);
+	const prefix = Number(`0x${hash.substr(0,neededChars)}`);
 	return prefix <= threshold;
 }
 
 function createTransaction(data) {
-	var tr = {
+	const tr = {
 		data,
 	};
 
