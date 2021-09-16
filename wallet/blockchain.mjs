@@ -1,11 +1,11 @@
 "use strict";
 
-var path = require("path");
-var fs = require("fs");
-var crypto = require("crypto");
-var openpgp = require("openpgp");
+import path from "path";
+import fs from "fs";
+import crypto from "crypto";
+import openpgp from "openpgp";
 
-var myChain = {
+const myChain = {
 	blocks: [],
 };
 
@@ -18,7 +18,7 @@ myChain.blocks.push({
 });
 
 
-Object.assign(module.exports,{
+export default {
 	chain: myChain,
 
 	createBlock,
@@ -26,13 +26,12 @@ Object.assign(module.exports,{
 	createTransaction,
 	authorizeInput,
 	verifyChain,
-});
-
+};
 
 // **********************************
 
 function createBlock(data) {
-	var bl = {
+	let bl = {
 		index: myChain.blocks.length,
 		prevHash: myChain.blocks[myChain.blocks.length-1].hash,
 		data,
@@ -49,7 +48,7 @@ function insertBlock(bl) {
 }
 
 function createTransaction(data) {
-	var tr = {
+	let tr = {
 		data,
 	};
 
@@ -58,7 +57,7 @@ function createTransaction(data) {
 	return tr;
 }
 
-async function authorizeInput(input,privKey) {
+async function authorizeInput(input, privKey) {
 	input.signature = await createSignature(input.account,privKey);
 	return input;
 }
@@ -84,9 +83,9 @@ async function verifyTransaction(tr) {
 }
 
 async function createSignature(text,privKey) {
-	var privKeyObj = openpgp.key.readArmored(privKey).keys[0];
+	let privKeyObj = openpgp.key.readArmored(privKey).keys[0];
 
-	var options = {
+	let options = {
 		data: text,
 		privateKeys: [privKeyObj],
 	};
@@ -142,7 +141,7 @@ async function verifyBlock(bl) {
 }
 
 async function verifyChain(chain) {
-	var prevHash;
+	let prevHash;
 	for (let bl of chain.blocks) {
 		if (prevHash && bl.prevHash !== prevHash) return false;
 		if (!(await verifyBlock(bl))) return false;
